@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             InkWell(
               onTap: () async {
-                await launch('https://twitter.com/tomriddle7', forceWebView: true, forceSafariVC: true);
+                await launch('https://twitter.com/tomriddle7', forceWebView: true, enableJavaScript: true, forceSafariVC: true);
               },
               child: Text(
                 '@tomriddle7',
