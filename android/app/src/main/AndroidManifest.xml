@@ -7,7 +7,7 @@
         </intent>
     </queries>
    <application
-        android:label="dotliella"
+        android:label="도트라이브++"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
