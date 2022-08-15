@@ -66,10 +66,22 @@ class _MyHomePageState extends State<MyHomePage> {
       'image': 'assets/liella_chisato1@2x.png'
     },
     {
+      'name': 'Sakurakoji Kinako',
+      'birthM': 4,
+      'birthD': 10,
+      'image': 'assets/liella_kinako1@2x.png'
+    },
+    {
       'name': 'Shibuya Kanon',
       'birthM': 5,
       'birthD': 1,
       'image': 'assets/liella_kanon1@2x.png'
+    },
+    {
+      'name': 'Wakana Shiki',
+      'birthM': 6,
+      'birthD': 17,
+      'image': 'assets/liella_shiki1@2x.png'
     },
     {
       'name': 'Tang Keke',
@@ -78,10 +90,22 @@ class _MyHomePageState extends State<MyHomePage> {
       'image': 'assets/liella_keke1@2x.png'
     },
     {
+      'name': 'Onitsuka Natsumi',
+      'birthM': 8,
+      'birthD': 7,
+      'image': 'assets/liella_natsumi1@2x.png'
+    },
+    {
       'name': 'Heanna Sumire',
       'birthM': 9,
       'birthD': 28,
       'image': 'assets/liella_sumire1@2x.png'
+    },
+    {
+      'name': 'Yoneme Mei',
+      'birthM': 10,
+      'birthD': 29,
+      'image': 'assets/liella_mei1@2x.png'
     },
     {
       'name': 'Hazuki Ren',
