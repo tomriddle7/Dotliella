@@ -4,39 +4,43 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "version.json": "2ddfd6e38d4a0553c040790888605209",
-"index.html": "7ca180ee9078490a16df9cb9c6273382",
-"/": "7ca180ee9078490a16df9cb9c6273382",
-"main.dart.js": "8d096ece3373c6ffbf8726ea133ef913",
+"index.html": "016dcd533380bb3a97190c334a58b5fd",
+"/": "016dcd533380bb3a97190c334a58b5fd",
+"main.dart.js": "d7515969fc7530a4a3a7452407920d82",
+"flutter.js": "195f32f4217e034162a6697208586f44",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "manifest.json": "0090cf186b47fd45709d74c0c41df21f",
-"assets/AssetManifest.json": "c90db656c99e614bdbd1a0301dcaafa2",
-"assets/NOTICES": "547d4409758e4bf87e5f61529067c647",
+"assets/AssetManifest.json": "b57d23cefe4aed520ac763273c9fe2f4",
+"assets/NOTICES": "0c5a03e5c69c258e99341f1e0e0ebe98",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "6d342eb68f170c97609e9da345464e5e",
-"assets/fonts/MaterialIcons-Regular.otf": "4e6447691c9509f7acdbf8a931a85ca1",
+"assets/shaders/ink_sparkle.frag": "a04e492a05f9fd1a8cc6f12163b184dd",
+"assets/fonts/MaterialIcons-Regular.otf": "e7069dfd19b331be16bed984668fe080",
+"assets/assets/liella_shiki1@2x.png": "47e3020890d54f9305d859274813e7a0",
+"assets/assets/liella_natsumi1@2x.png": "c974df174db80ae2da71376e0030bb51",
 "assets/assets/liella_ren1@2x.png": "f7b6db9fe3e322309b80174a3482fbcf",
 "assets/assets/liella_kanon1@2x.png": "63abb9b5a85f690bd3e93e8b220cdd71",
 "assets/assets/liella_sumire1@2x.png": "1a98e4ffd6f5a3fd55e09eb81d4d834d",
+"assets/assets/liella_mei1@2x.png": "5ff90ec1f5893e6a78d23d88e7a980d3",
 "assets/assets/liella_chisato1@2x.png": "4b4ecc1af8a39cf2fb6c9a9c4968d6d7",
+"assets/assets/liella_kinako1@2x.png": "82d265be085599181c9731e99c2d4e98",
 "assets/assets/liella_keke1@2x.png": "872245c9ee5acb948e2e1f21e752c77c",
 "assets/assets/splash_logo.png": "d024186121fa75b2b751513388c56983",
-"canvaskit/canvaskit.js": "62b9906717d7215a6ff4cc24efbd1b5c",
-"canvaskit/profiling/canvaskit.js": "3783918f48ef691e230156c251169480",
-"canvaskit/profiling/canvaskit.wasm": "6d1b0fc1ec88c3110db88caa3393c580",
-"canvaskit/canvaskit.wasm": "b179ba02b7a9f61ebc108f82c5a1ecdb"
+"canvaskit/canvaskit.js": "687636ce014616f8b829c44074231939",
+"canvaskit/profiling/canvaskit.js": "ba8aac0ba37d0bfa3c9a5f77c761b88b",
+"canvaskit/profiling/canvaskit.wasm": "05ad694fda6cfca3f9bbac4b18358f93",
+"canvaskit/canvaskit.wasm": "d4972dbefe733345d4eabb87d17fcb5f"
 };
 
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = [
-//  "/",
-"main.dart.js",
+  "main.dart.js",
 "index.html",
-"assets/NOTICES",
 "assets/AssetManifest.json",
 "assets/FontManifest.json"];
 // During install, the TEMP cache is populated with the application shell files.
@@ -135,9 +139,11 @@ self.addEventListener("fetch", (event) => {
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
         // Either respond with the cached resource, or perform a fetch and
-        // lazily populate the cache.
+        // lazily populate the cache only if the resource was successfully fetched.
         return response || fetch(event.request).then((response) => {
-          cache.put(event.request, response.clone());
+          if (response && Boolean(response.ok)) {
+            cache.put(event.request, response.clone());
+          }
           return response;
         });
       })
