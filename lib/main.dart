@@ -51,12 +51,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Timer _timer;
 
-  List<String> birthWeekday = ['월', '화', '수', '목', '금', '토', '일'] ;
+  List<String> birthWeekday = ['월', '화', '수', '목', '금', '토', '일'];
   List<String> diffBirth = [];
+  List<num> diffSec = [];
   List<String> liellaWeekday = [];
+  PageController _pageController;
 
-  final _pageController = PageController();
-  final _currentPageNotifier = ValueNotifier<int>(0);
+  final _currentPageNotifier = ValueNotifier<int>(-1);
 
   var liellaList = [
     {
@@ -115,12 +116,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   ];
 
-  void BetweenDate() {
+  void betweenDate() {
     var tempString = '';
     final date2 = DateTime.now();
     final year = date2.year;
 
     diffBirth = [];
+    diffSec = [];
     liellaWeekday = [];
     for (int i = 0; i < liellaList.length; i++) {
       var birthday = DateTime(year, liellaList[i]['birthM'], liellaList[i]['birthD']);
@@ -157,9 +159,21 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   initState() {
     super.initState();
-    BetweenDate();
+    betweenDate();
+    if (diffSec[liellaList.length - 1] > 0 && diffSec[0] <= 0) {
+      _currentPageNotifier.value = 0;
+    }
+    if (_currentPageNotifier.value < 0) {
+      for (int i = 0; i < liellaList.length - 1; i++) {
+        if (diffSec[i] > 0 && diffSec[i + 1] <= 0) {
+          _currentPageNotifier.value = i + 1;
+          break;
+        }
+      }
+    }
+    _pageController = PageController(initialPage: _currentPageNotifier.value);
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      BetweenDate();
+      betweenDate();
     });
   }
 
@@ -284,6 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Stack(
           children: <Widget>[
             PageView(
+              controller: _pageController,
               children: WidgetList(),
               onPageChanged: (int index) {
                 _currentPageNotifier.value = index;
