@@ -25,13 +25,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'DotLive++'),
+      home: MyHomePage(key: UniqueKey(), title: 'DotLive++'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({required Key key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -49,17 +49,23 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Timer _timer;
+  late Timer _timer;
 
   List<String> birthWeekday = ['월', '화', '수', '목', '금', '토', '일'];
   List<String> diffBirth = [];
   List<num> diffSec = [];
   List<String> liellaWeekday = [];
-  PageController _pageController;
+  late PageController _pageController;
 
   final _currentPageNotifier = ValueNotifier<int>(-1);
 
   var liellaList = [
+    {
+      'name': 'Wien Margarete',
+      'birthM': 1,
+      'birthD': 20,
+      'image': 'assets/liella_margarete1@2x.png'
+    },
     {
       'name': 'Arashi Chisato',
       'birthM': 2,
@@ -113,6 +119,12 @@ class _MyHomePageState extends State<MyHomePage> {
       'birthM': 11,
       'birthD': 24,
       'image': 'assets/liella_ren1@2x.png'
+    },
+    {
+      'name': 'Onitsuka Tomari',
+      'birthM': 12,
+      'birthD': 28,
+      'image': 'assets/liella_tomari1@2x.png'
     }
   ];
 
@@ -125,29 +137,49 @@ class _MyHomePageState extends State<MyHomePage> {
     diffSec = [];
     liellaWeekday = [];
     for (int i = 0; i < liellaList.length; i++) {
-      var birthday = DateTime(year, liellaList[i]['birthM'], liellaList[i]['birthD']);
+      var birthday = DateTime(
+          year, liellaList[i]['birthM'] as int, liellaList[i]['birthD'] as int);
       var difference = date2.difference(birthday);
       var diffDay = difference.inDays;
-      var diffHour = difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
-      var diffMinute = difference.inMinutes % 60 == 0 ? 0 : 60 - (difference.inMinutes % 60);
-      var diffSecond = difference.inSeconds % 60 == 0 ? 0 : 60 - (difference.inSeconds % 60);
+      var diffHour =
+          difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
+      var diffMinute =
+          difference.inMinutes % 60 == 0 ? 0 : 60 - (difference.inMinutes % 60);
+      var diffSecond =
+          difference.inSeconds % 60 == 0 ? 0 : 60 - (difference.inSeconds % 60);
       if (difference.inSeconds < 86400 && difference.inSeconds >= 0) {
         tempString = '생일이에요!\n축하합니다!';
-      }
-      else if (difference.inSeconds < 0) {
+      } else if (difference.inSeconds < 0) {
         diffDay *= -1;
 
-        tempString = diffDay.toString() + '일 ' + diffHour.toString().padLeft(2, '0') + ':' + diffMinute.toString().padLeft(2, '0') + ':' + diffSecond.toString().padLeft(2, '0');
-      }
-      else {
-        birthday = DateTime(year + 1, liellaList[i]['birthM'], liellaList[i]['birthD']);
+        tempString = diffDay.toString() +
+            '일 ' +
+            diffHour.toString().padLeft(2, '0') +
+            ':' +
+            diffMinute.toString().padLeft(2, '0') +
+            ':' +
+            diffSecond.toString().padLeft(2, '0');
+      } else {
+        birthday = DateTime(year + 1, liellaList[i]['birthM'] as int,
+            liellaList[i]['birthD'] as int);
         difference = date2.difference(birthday);
         diffDay = difference.inDays * -1;
-        diffHour = difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
-        diffMinute = difference.inMinutes % 60 == 0 ? 0 : 60 - (difference.inMinutes % 60);
-        diffSecond = difference.inSeconds % 60 == 0 ? 0 : 60 - (difference.inSeconds % 60);
+        diffHour =
+            difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
+        diffMinute = difference.inMinutes % 60 == 0
+            ? 0
+            : 60 - (difference.inMinutes % 60);
+        diffSecond = difference.inSeconds % 60 == 0
+            ? 0
+            : 60 - (difference.inSeconds % 60);
 
-        tempString = diffDay.toString() + '일 ' + diffHour.toString().padLeft(2, '0') + ':' + diffMinute.toString().padLeft(2, '0') + ':' + diffSecond.toString().padLeft(2, '0');
+        tempString = diffDay.toString() +
+            '일 ' +
+            diffHour.toString().padLeft(2, '0') +
+            ':' +
+            diffMinute.toString().padLeft(2, '0') +
+            ':' +
+            diffSecond.toString().padLeft(2, '0');
       }
       setState(() {
         diffBirth.add(tempString);
@@ -182,50 +214,42 @@ class _MyHomePageState extends State<MyHomePage> {
     // 캐릭터 데이터 추가.
     for (int i = 0; i < liellaList.length; i++) {
       Center box = Center(
-          child: Stack(
-              alignment: Alignment.center,
+          child: Stack(alignment: Alignment.center, children: <Widget>[
+        Image.asset(liellaList[i]['image'] as String,
+            width: 1000,
+            height: 1000,
+            fit: BoxFit.cover,
+            color: Color.fromRGBO(255, 255, 255, 0.5),
+            colorBlendMode: BlendMode.modulate),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Image.asset(
-                    liellaList[i]['image'],
-                    width: 1000,
-                    height: 1000,
-                    fit: BoxFit.cover,
-                    color: Color.fromRGBO(255, 255, 255, 0.5),
-                    colorBlendMode: BlendMode.modulate
+                Image.asset(liellaList[i]['image'] as String),
+                Text(
+                  '${liellaList[i]['birthM']}월\n${liellaList[i]['birthD']}일\n(${liellaWeekday[i]})',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 45,
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Image.asset(
-                            liellaList[i]['image']
-                        ),
-                        Text(
-                          '${liellaList[i]['birthM']}월\n${liellaList[i]['birthD']}일\n(${liellaWeekday[i]})',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 45,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0),
-                    Text(
-                      diffBirth[i],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 48,
-                      ),
-                    ),
-                  ],
-                ),
-              ]
-          )
-      );
+              ],
+            ),
+            SizedBox(height: 10.0),
+            Text(
+              diffBirth[i],
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 48,
+              ),
+            ),
+          ],
+        ),
+      ]));
       res.add(box);
     }
     // 개인 프로필 추가.
@@ -246,7 +270,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             InkWell(
               onTap: () async {
-                await launch('https://twitter.com/tomriddle7', forceWebView: true, enableJavaScript: true, forceSafariVC: true);
+                await launch('https://twitter.com/tomriddle7',
+                    forceWebView: true,
+                    enableJavaScript: true,
+                    forceSafariVC: true);
               },
               child: Text(
                 '@tomriddle7',
