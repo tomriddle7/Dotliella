@@ -1,0 +1,79 @@
+[
+  {
+    "name": "빈 마르가레테",
+    "month": 1,
+    "day": 20,
+    "image": "assets/images/liella_margarete1@2x.png",
+    "body": "오늘은 내 생일이야. 내 완벽한 퍼포먼스에 어울리는 축하를 기대할게. 늦지 않게 와서 지켜보라고."
+  },
+  {
+    "name": "아라시 치사토",
+    "month": 2,
+    "day": 25,
+    "image": "assets/images/liella_chisato1@2x.png",
+    "body": "우이~쓰! 오늘은 내 생일이야! 축하해 줘서 정말 고마워. 동그란 생일 케이크를 다 같이 나눠 먹자!"
+  },
+  {
+    "name": "사쿠라코지 키나코",
+    "month": 4,
+    "day": 10,
+    "image": "assets/images/liella_kinako1@2x.png",
+    "body": "오늘은 키나코의 생일임다! 선배들과 모두에게 축하를 받다니, 홋카이도에 있을 땐 상상도 못 할 만큼 행복함다!"
+  },
+  {
+    "name": "시부야 카논",
+    "month": 5,
+    "day": 1,
+    "image": "assets/images/liella_kanon1@2x.png",
+    "body": "오늘 내 생일이야! 너와 함께 노래하며 이 특별한 날을 축하받을 수 있어서 정말 기뻐!"
+  },
+  {
+    "name": "와카나 시키",
+    "month": 6,
+    "day": 17,
+    "image": "assets/images/liella_shiki1@2x.png",
+    "body": "내 생일... 메이와 모두가 축하해 줘서 기뻐. 네가 준 생일 축하 메시지도, 내 소중한 데이터로 영구 보존할게."
+  },
+  {
+    "name": "탕 쿠쿠",
+    "month": 7,
+    "day": 17,
+    "image": "assets/images/liella_keke1@2x.png",
+    "body": "오늘은 쿠쿠가 태어난 아주 스바라시한 날입니닷! 같이 최고로 열정적인 파티를 즐겨볼까요? 쿠카! 쿠카!"
+  },
+  {
+    "name": "오니츠카 나츠미",
+    "month": 8,
+    "day": 7,
+    "image": "assets/images/liella_natsumi1@2x.png",
+    "body": "오니낫츠~! 오늘은 제 생일이랍니다! 생일 기념 특별 L튜브 라이브, 슈퍼챗과 좋아요로 팍팍 축하해 주실 거죠?"
+  },
+  {
+    "name": "헤안나 스미레",
+    "month": 9,
+    "day": 28,
+    "image": "assets/images/liella_sumire1@2x.png",
+    "body": "드디어 이 쇼 비즈니스 세계의 주역인 내 생일이 찾아왔네! 오늘만큼은 나만의 빛나는 갤럭~시한 매력을 마음껏 축하해 달라고!"
+  },
+  {
+    "name": "요네메 메이",
+    "month": 10,
+    "day": 29,
+    "image": "assets/images/liella_mei1@2x.png",
+    "body": "따, 딱히 내 생일이라고 해서 엄청 기대한 건 아니니까! ...그래도 이렇게 축하해 주러 와서... 고, 고마워."
+  },
+  {
+    "name": "하즈키 렌",
+    "month": 11,
+    "day": 24,
+    "image": "assets/images/liella_ren1@2x.png",
+    "body": "오늘은 제 생일입니다. 유이가오카의 여러분, 그리고 당신과 함께 이 기쁜 날을 맞이할 수 있어 진심으로 감사합니다."
+  },
+  {
+    "name": "오니츠카 토마리",
+    "month": 12,
+    "day": 28,
+    "image": "assets/images/liella_tomari1@2x.png",
+    "body": "제 생일이군요. 여러분이 축하해 주실 확률 100%라고 데이터가 말하고 있었지만, 막상 들으니 꽤 기분 좋은 결과네요."
+  }
+]

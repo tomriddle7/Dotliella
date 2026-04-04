@@ -1,339 +1,372 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
-import 'package:page_view_indicators/page_view_indicators.dart';
+import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-void main() {
-  runApp(MyApp());
+import 'notification_service_mobile.dart'
+if (dart.library.html) 'notification_service_web.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
+
+  await initNotifications();
+  await checkAndShowBirthdayNotifications();
+
+  runApp(const MyApp());
+}
+
+Future<void> checkAndShowBirthdayNotifications() async {
+  try {
+    final String response =
+    await rootBundle.loadString('assets/data/members.json');
+    final List<dynamic> data = json.decode(response);
+
+    DateTime now = DateTime.now();
+
+    for (var member in data) {
+      String name = member['name'];
+      String birthdayStr = member['birthday'];
+
+      List<String> dateParts = birthdayStr.split('-');
+      int month = int.parse(dateParts[dateParts.length - 2]);
+      int day = int.parse(dateParts.last);
+
+      if (now.month == month && now.day == day) {
+        await fireNotification(name);
+      }
+    }
+  } catch (e) {
+    debugPrint('데이터 불러오기 실패: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DotLive++',
+      title: 'DotLive*',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      home: MyHomePage(key: UniqueKey(), title: 'DotLive++'),
+      home: const MyHomePage(title: 'DotLive*'),
+    );
+  }
+}
+
+class IdolMember {
+  final String name;
+  final int birthMonth;
+  final int birthDay;
+  final String image;
+  final String body;
+
+  IdolMember({
+    required this.name,
+    required this.birthMonth,
+    required this.birthDay,
+    required this.image,
+    required this.body,
+  });
+
+  factory IdolMember.fromJson(Map<String, dynamic> json) {
+    return IdolMember(
+      name: json['name'],
+      birthMonth: json['month'],
+      birthDay: json['day'],
+      image: json['image'],
+      body: json['body'] ?? '${json['name']}의 생일을 축하해 주세요! 🎉',
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({required Key key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
+  const MyHomePage({super.key, required this.title});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late Timer _timer;
+  final List<String> birthWeekday = ['월', '화', '수', '목', '금', '토', '일'];
 
-  List<String> birthWeekday = ['월', '화', '수', '목', '금', '토', '일'];
-  List<String> diffBirth = [];
-  List<num> diffSec = [];
-  List<String> liellaWeekday = [];
+  List<IdolMember> nijidongList = [];
+  bool isLoading = true;
+
   late PageController _pageController;
+  final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<DateTime> _currentTimeNotifier =
+  ValueNotifier<DateTime>(DateTime.now());
+  Timer? _timer;
 
-  final _currentPageNotifier = ValueNotifier<int>(-1);
-
-  var liellaList = [
-    {
-      'name': 'Wien Margarete',
-      'birthM': 1,
-      'birthD': 20,
-      'image': 'assets/liella_margarete1@2x.png'
-    },
-    {
-      'name': 'Arashi Chisato',
-      'birthM': 2,
-      'birthD': 25,
-      'image': 'assets/liella_chisato1@2x.png'
-    },
-    {
-      'name': 'Sakurakoji Kinako',
-      'birthM': 4,
-      'birthD': 10,
-      'image': 'assets/liella_kinako1@2x.png'
-    },
-    {
-      'name': 'Shibuya Kanon',
-      'birthM': 5,
-      'birthD': 1,
-      'image': 'assets/liella_kanon1@2x.png'
-    },
-    {
-      'name': 'Wakana Shiki',
-      'birthM': 6,
-      'birthD': 17,
-      'image': 'assets/liella_shiki1@2x.png'
-    },
-    {
-      'name': 'Tang Keke',
-      'birthM': 7,
-      'birthD': 17,
-      'image': 'assets/liella_keke1@2x.png'
-    },
-    {
-      'name': 'Onitsuka Natsumi',
-      'birthM': 8,
-      'birthD': 7,
-      'image': 'assets/liella_natsumi1@2x.png'
-    },
-    {
-      'name': 'Heanna Sumire',
-      'birthM': 9,
-      'birthD': 28,
-      'image': 'assets/liella_sumire1@2x.png'
-    },
-    {
-      'name': 'Yoneme Mei',
-      'birthM': 10,
-      'birthD': 29,
-      'image': 'assets/liella_mei1@2x.png'
-    },
-    {
-      'name': 'Hazuki Ren',
-      'birthM': 11,
-      'birthD': 24,
-      'image': 'assets/liella_ren1@2x.png'
-    },
-    {
-      'name': 'Onitsuka Tomari',
-      'birthM': 12,
-      'birthD': 28,
-      'image': 'assets/liella_tomari1@2x.png'
-    }
-  ];
-
-  void betweenDate() {
-    var tempString = '';
-    final date2 = DateTime.now();
-    final year = date2.year;
-
-    diffBirth = [];
-    diffSec = [];
-    liellaWeekday = [];
-    for (int i = 0; i < liellaList.length; i++) {
-      var birthday = DateTime(
-          year, liellaList[i]['birthM'] as int, liellaList[i]['birthD'] as int);
-      var difference = date2.difference(birthday);
-      var diffDay = difference.inDays;
-      var diffHour =
-          difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
-      var diffMinute =
-          difference.inMinutes % 60 == 0 ? 0 : 60 - (difference.inMinutes % 60);
-      var diffSecond =
-          difference.inSeconds % 60 == 0 ? 0 : 60 - (difference.inSeconds % 60);
-      if (difference.inSeconds < 86400 && difference.inSeconds >= 0) {
-        tempString = '생일이에요!\n축하합니다!';
-      } else if (difference.inSeconds < 0) {
-        diffDay *= -1;
-
-        tempString = diffDay.toString() +
-            '일 ' +
-            diffHour.toString().padLeft(2, '0') +
-            ':' +
-            diffMinute.toString().padLeft(2, '0') +
-            ':' +
-            diffSecond.toString().padLeft(2, '0');
-      } else {
-        birthday = DateTime(year + 1, liellaList[i]['birthM'] as int,
-            liellaList[i]['birthD'] as int);
-        difference = date2.difference(birthday);
-        diffDay = difference.inDays * -1;
-        diffHour =
-            difference.inHours % 24 == 0 ? 0 : 24 - (difference.inHours % 24);
-        diffMinute = difference.inMinutes % 60 == 0
-            ? 0
-            : 60 - (difference.inMinutes % 60);
-        diffSecond = difference.inSeconds % 60 == 0
-            ? 0
-            : 60 - (difference.inSeconds % 60);
-
-        tempString = diffDay.toString() +
-            '일 ' +
-            diffHour.toString().padLeft(2, '0') +
-            ':' +
-            diffMinute.toString().padLeft(2, '0') +
-            ':' +
-            diffSecond.toString().padLeft(2, '0');
-      }
-      setState(() {
-        diffBirth.add(tempString);
-        liellaWeekday.add(birthWeekday[birthday.weekday - 1]);
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadMembersData();
   }
 
   @override
-  initState() {
-    super.initState();
-    betweenDate();
-    if (diffSec[liellaList.length - 1] > 0 && diffSec[0] <= 0) {
-      _currentPageNotifier.value = 0;
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    _currentPageNotifier.dispose();
+    _currentTimeNotifier.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadMembersData() async {
+    try {
+      final String jsonString =
+      await rootBundle.loadString('assets/data/members.json');
+      final List<dynamic> jsonData = jsonDecode(jsonString);
+
+      nijidongList =
+          jsonData.map((data) => IdolMember.fromJson(data)).toList();
+
+      int nearestIndex = _getNearestBirthdayIndex();
+      _pageController = PageController(initialPage: nearestIndex);
+      _currentPageNotifier.value = nearestIndex;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      _startTimer();
+      _scheduleBirthdayNotifications();
+    } catch (e) {
+      debugPrint('데이터를 불러오는데 실패했습니다: $e');
     }
-    if (_currentPageNotifier.value < 0) {
-      for (int i = 0; i < liellaList.length - 1; i++) {
-        if (diffSec[i] > 0 && diffSec[i + 1] <= 0) {
-          _currentPageNotifier.value = i + 1;
-          break;
-        }
+  }
+
+  int _getNearestBirthdayIndex() {
+    if (nijidongList.isEmpty) return 0;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    int nearestIndex = 0;
+    int minDays = 9999;
+
+    for (int i = 0; i < nijidongList.length; i++) {
+      final member = nijidongList[i];
+      DateTime nextBirthday =
+      DateTime(now.year, member.birthMonth, member.birthDay);
+
+      if (nextBirthday.isBefore(today)) {
+        nextBirthday =
+            DateTime(now.year + 1, member.birthMonth, member.birthDay);
+      }
+
+      final difference = nextBirthday.difference(today).inDays;
+
+      if (difference < minDays) {
+        minDays = difference;
+        nearestIndex = i;
       }
     }
-    _pageController = PageController(initialPage: _currentPageNotifier.value);
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      betweenDate();
+    return nearestIndex;
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _currentTimeNotifier.value = DateTime.now();
     });
   }
 
-  List<Center> WidgetList() {
-    List<Center> res = [];
-    // 캐릭터 데이터 추가.
-    for (int i = 0; i < liellaList.length; i++) {
-      Center box = Center(
-          child: Stack(alignment: Alignment.center, children: <Widget>[
-        Image.asset(liellaList[i]['image'] as String,
-            width: 1000,
-            height: 1000,
-            fit: BoxFit.cover,
-            color: Color.fromRGBO(255, 255, 255, 0.5),
-            colorBlendMode: BlendMode.modulate),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Image.asset(liellaList[i]['image'] as String),
-                Text(
-                  '${liellaList[i]['birthM']}월\n${liellaList[i]['birthD']}일\n(${liellaWeekday[i]})',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 45,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              diffBirth[i],
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 48,
-              ),
-            ),
-          ],
-        ),
-      ]));
-      res.add(box);
+  String _getDDayString(IdolMember member, DateTime now) {
+    var birthday = DateTime(now.year, member.birthMonth, member.birthDay);
+    var difference = now.difference(birthday);
+
+    if (difference.inSeconds >= 0 && difference.inSeconds < 86400) {
+      return '생일이에요!\n축하합니다!';
     }
-    // 개인 프로필 추가.
-    Center box = Center(
-      child: Container(
-        alignment: Alignment(0.0, 0.0),
-        color: Color.fromARGB(255, 23, 63, 123),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'tomriddle7',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 45,
-              ),
-            ),
-            InkWell(
-              onTap: () async {
-                await launch('https://twitter.com/tomriddle7',
-                    forceWebView: true,
-                    enableJavaScript: true,
-                    forceSafariVC: true);
-              },
-              child: Text(
-                '@tomriddle7',
-                style: TextStyle(
-                  color: Colors.lightBlueAccent,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 32,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    res.add(box);
-    return res;
+
+    if (difference.inSeconds >= 86400) {
+      birthday = DateTime(now.year + 1, member.birthMonth, member.birthDay);
+      difference = now.difference(birthday);
+    }
+
+    int diffDay = difference.inDays.abs();
+    int diffHour = 23 - now.hour;
+    int diffMinute = 59 - now.minute;
+    int diffSecond = 59 - now.second;
+
+    return '${diffDay}일 ${diffHour.toString().padLeft(2, '0')}:${diffMinute.toString().padLeft(2, '0')}:${diffSecond.toString().padLeft(2, '0')}';
   }
 
-  _buildCircleIndicator() {
-    return Positioned(
-      left: 0.0,
-      right: 0.0,
-      bottom: 50.0,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CirclePageIndicator(
-          dotColor: Colors.white70,
-          selectedDotColor: Colors.redAccent,
-          itemCount: liellaList.length + 1,
-          currentPageNotifier: _currentPageNotifier,
-        ),
+  Future<void> _scheduleBirthdayNotifications() async {
+    for (int i = 0; i < nijidongList.length; i++) {
+      final member = nijidongList[i];
+      final now = tz.TZDateTime.now(tz.local);
+
+      var scheduledDate = tz.TZDateTime(
+          tz.local, now.year, member.birthMonth, member.birthDay, 0, 0);
+
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = tz.TZDateTime(
+            tz.local, now.year + 1, member.birthMonth, member.birthDay, 0, 0);
+      }
+
+      // ✨ 변경된 부분: JSON에서 파싱해 온 body와 image 변수를 바로 넣습니다.
+      await scheduleNotification(
+        id: i,
+        title: '생일 축하해, ${member.name}!🎂', // 타이틀도 원하시면 JSON으로 뺄 수 있어요!
+        body: member.body,        // members.json에서 가져온 고유 텍스트
+        imagePath: member.image,  // members.json에서 가져온 이미지 경로
+        scheduledDate: scheduledDate,
+      );
+    }
+  }
+
+  Widget _buildCircleIndicator() {
+    return ValueListenableBuilder<int>(
+      valueListenable: _currentPageNotifier,
+      builder: (context, currentPage, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(nijidongList.length + 1, (index) {
+            bool isSelected = currentPage == index;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              width: isSelected ? 12.0 : 8.0,
+              height: isSelected ? 12.0 : 8.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? Colors.redAccent : Colors.white70,
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfilePage() {
+    return Container(
+      color: const Color.fromARGB(255, 23, 63, 123),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'tomriddle7',
+            style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 45),
+          ),
+          InkWell(
+            onTap: () async {
+              final url = Uri.parse('https://x.com/tomriddle7');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: const Text(
+              '@tomriddle7',
+              style: TextStyle(
+                  color: Colors.lightBlueAccent,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 32),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    if (isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.lightBlueAccent,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.lightBlueAccent,
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Stack(
-          children: <Widget>[
-            PageView(
-              controller: _pageController,
-              children: WidgetList(),
-              onPageChanged: (int index) {
-                _currentPageNotifier.value = index;
-              },
-            ),
-            _buildCircleIndicator(),
-          ],
-        ),
+      body: Stack(
+        children: <Widget>[
+          PageView.builder(
+            controller: _pageController,
+            itemCount: nijidongList.length + 1,
+            onPageChanged: (int index) {
+              _currentPageNotifier.value = index;
+            },
+            itemBuilder: (context, index) {
+              if (index == nijidongList.length) {
+                return _buildProfilePage();
+              }
+
+              final member = nijidongList[index];
+              final dummyDate =
+              DateTime(2024, member.birthMonth, member.birthDay);
+              final weekdayStr = birthWeekday[dummyDate.weekday - 1];
+
+              return Stack(
+                alignment: Alignment.center,
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Image.asset(
+                    member.image,
+                    fit: BoxFit.cover,
+                    color: const Color.fromRGBO(255, 255, 255, 0.5),
+                    colorBlendMode: BlendMode.modulate,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Image.asset(member.image),
+                          Text(
+                            '${member.birthMonth}월\n${member.birthDay}일\n($weekdayStr)',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 45),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20.0),
+                      ValueListenableBuilder<DateTime>(
+                        valueListenable: _currentTimeNotifier,
+                        builder: (context, now, child) {
+                          return Text(
+                            _getDDayString(member, now),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 48),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            bottom: 50.0,
+            left: 0,
+            right: 0,
+            child: _buildCircleIndicator(),
+          ),
+        ],
       ),
     );
   }
