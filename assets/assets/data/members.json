@@ -1,0 +1,79 @@
+[
+  {
+    "name": "Wien Margarete",
+    "month": 1,
+    "day": 20,
+    "image": "assets/images/liella_margarete1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Arashi Chisato",
+    "month": 2,
+    "day": 25,
+    "image": "assets/images/liella_chisato1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Sakurakoji Kinako",
+    "month": 4,
+    "day": 10,
+    "image": "assets/images/liella_kinako1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Shibuya Kanon",
+    "month": 5,
+    "day": 1,
+    "image": "assets/images/liella_kanon1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Wakana Shiki",
+    "month": 6,
+    "day": 17,
+    "image": "assets/images/liella_shiki1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Tang Keke",
+    "month": 7,
+    "day": 17,
+    "image": "assets/images/liella_keke1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Onitsuka Natsumi",
+    "month": 8,
+    "day": 7,
+    "image": "assets/images/liella_natsumi1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Heanna Sumire",
+    "month": 9,
+    "day": 28,
+    "image": "assets/images/liella_sumire1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Yoneme Mei",
+    "month": 10,
+    "day": 29,
+    "image": "assets/images/liella_mei1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Hazuki Ren",
+    "month": 11,
+    "day": 24,
+    "image": "assets/images/liella_ren1@2x.png",
+    "body": ""
+  },
+  {
+    "name": "Onitsuka Tomari",
+    "month": 12,
+    "day": 28,
+    "image": "assets/images/liella_tomari1@2x.png",
+    "body": ""
+  }
+]
